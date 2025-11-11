@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nigerian PAYE Dashboard (Effective Jan 1, 2026)</title>
+<style>
+  :root {
+    --green: #007f3d;
+    --dark-green: #005a2b;
+    --light: #f5f7f9;
+    --card: #ffffff;
+    --shadow: rgba(0,0,0,0.08);
+    --border-color: #e0e0e0;
+    font-size: 16px; 
+  }
+
+  body {
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background: var(--light);
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    background: var(--dark-green);
+    color: white;
+    padding: 1.2rem;
+    text-align: center;
+    font-size: clamp(1.4rem, 4vw, 1.6rem);
+    font-weight: 600;
+    box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+  }
+
+  .dashboard {
+    max-width: 80rem; 
+    margin: 1.875rem auto; 
+    padding: 1.25rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); 
+    gap: 1.875rem; 
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 0.75rem; 
+    padding: 1.875rem; 
+    box-shadow: 0 0.25rem 0.75rem var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card:hover {
+    transform: translateY(-0.3125rem);
+    box-shadow: 0 0.5rem 1.25rem var(--shadow);
+  }
+  
+  .card > div {
+    flex-grow: 1; 
+  }
+
+  h3 {
+    color: var(--dark-green);
+    margin-top: 0;
+    margin-bottom: 1.25rem; 
+    border-bottom: 2px solid var(--green);
+    padding-bottom: 0.625rem; 
+    font-size: 1.25rem;
+  }
+
+  label {
+    font-weight: 600;
+    color: #555;
+    display: block;
+    margin-top: 0.9375rem; 
+    font-size: 0.95rem;
+  }
+
+  select, input {
+    width: 100%;
+    padding: 0.75rem; 
+    margin-top: 0.5rem; 
+    border-radius: 0.5rem; 
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  
+  .salary-input-group {
+    display: none; /* Hide all salary groups by default */
+  }
+
+  button {
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 0.5rem; 
+    padding: 0.75rem; 
+    width: 100%;
+    margin-top: 1.25rem; 
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  button:hover {
+    background: var(--dark-green);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr)); 
+    gap: 1.25rem; 
+    margin-top: 1.5rem; 
+  }
+
+  .stat {
+    background: var(--light);
+    border-radius: 0.625rem; 
+    padding: 1.25rem; 
+    box-shadow: 0 2px 5px var(--shadow);
+    text-align: center;
+    border-left: 0.3125rem solid var(--green); 
+  }
+  
+  .stat strong {
+    color: var(--dark-green);
+    display: block;
+    margin-bottom: 0.3125rem; 
+    font-size: 0.9rem;
+  }
+
+  .note {
+    font-size: 0.9rem;
+    color: #555;
+    text-align: center;
+    margin-top: 0.9375rem; 
+    background: #e8f5e9;
+    padding: 0.625rem; 
+    border-radius: 0.5rem; 
+  }
+  
+  #summary p {
+    font-size: 1.05rem;
+    padding: 0.5rem 0; 
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; 
+  }
+  
+  #summary p:last-child {
+    border-bottom: none;
+  }
+  
+  #summary strong {
+    color: #333;
+    padding-right: 0.625rem; 
+  }
+  
+  #summary span {
+    font-weight: 600;
+    color: var(--dark-green);
+    text-align: right;
+  }
+
+  canvas {
+    width: 100% !important;
+    max-height: 17.5rem; 
+    margin-top: 1.5rem; 
+  }
+  
+  @media (max-width: 1199px) {
+    .grid {
+      grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); 
+    }
+    .dashboard {
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    
+    header {
+      padding: 1rem;
+    }
+
+    .dashboard {
+      margin-top: 1rem;
+      padding: 0.5rem;
+    }
+    
+    .card {
+      padding: 1.25rem;
+    }
+    
+    #summary p {
+      font-size: 1rem;
+    }
+  }
+</style>
+</head>
+<body>
+<header>Nigerian PAYE Tax Dashboard (Effective Jan 1, 2026)</header>
+
+<div class="dashboard">
+  <div class="grid">
+    <!-- Row 1, Column 1 -->
+    <div class="card">
+      <h3>Your Earnings & Reliefs</h3>
+      <div>
+        <label for="salaryStructure">Pay Structure:</label>
+        <select id="salaryStructure" onchange="handleSalaryStructureChange()">
+            <option value="daily" selected>Daily Pay</option>
+            <option value="weekly">Weekly Pay</option>
+            <option value="monthly">Monthly Pay</option>
+        </select>
+
+        <div id="dailyPayGroup" class="salary-input-group">
+            <label for="dailyPay">Daily Pay (₦):</label>
+            <input type="number" id="dailyPay" placeholder="e.g., 5000">
+        </div>
+
+        <div id="weeklyPayGroup" class="salary-input-group">
+            <label for="weeklyPay">Weekly Pay (₦):</label>
+            <input type="number" id="weeklyPay" placeholder="e.g., 25000">
+        </div>
+
+        <div id="monthlyPayGroup" class="salary-input-group">
+            <label for="monthlyPay">Monthly Pay (₦):</label>
+            <input type="number" id="monthlyPay" placeholder="e.g., 100000">
+        </div>
+
+        <div id="daysWorkedGroup">
+            <label for="daysWorked">Days Worked (This Month):</label>
+            <input type="number" id="daysWorked" placeholder="e.g., 22">
+        </div>
+  
+        <label for="overtime">Overtime Hours (This Month):</label>
+        <input type="number" id="overtime" placeholder="e.g., 5">
+        
+        <label for="annualRent">Annual Rent Paid (₦):</label>
+        <input type="number" id="annualRent" placeholder="e.g., 600000">
+      </div>
+    </div>
+    
+    <!-- Row 1, Column 2 -->
+    <div class="card">
+      <h3>Allowances (Monthly)</h3>
+      <div>
+        <label for="transportAllowance">Transport Allowance (₦):</label>
+        <input type="number" id="transportAllowance" placeholder="e.g., 20000">
+  
+        <label for="feedingAllowance">Feeding Allowance (₦):</label>
+        <input type="number" id="feedingAllowance" placeholder="e.g., 15000">
+      </div>
+      
+      <button onclick="calculateTax()">Calculate 2026 PAYE</button>
+      <p class="note">Allowances are part of your gross income and are taxable.</p>
+    </div>
+
+    <!-- Row 1, Column 3 -->
+    <div class="card">
+      <h3>Monthly Financial Summary</h3>
+      <div id="summary">
+        <p>Enter details and click calculate to see the breakdown.</p>
+      </div>
+    </div>
+    
+    <!-- Row 2: Full Width -->
+    <div class="card" style="grid-column: 1 / -1;">
+      <h3>Detailed Annual Analysis</h3>
+      <div class="stats" id="stats"></div>
+      <canvas id="taxChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    handleSalaryStructureChange(); // Set initial state on page load
+});
+
+function handleSalaryStructureChange() {
+    const structure = document.getElementById('salaryStructure').value;
+    
+    // Hide all salary input groups first
+    document.getElementById('dailyPayGroup').style.display = 'none';
+    document.getElementById('weeklyPayGroup').style.display = 'none';
+    document.getElementById('monthlyPayGroup').style.display = 'none';
+    document.getElementById('daysWorkedGroup').style.display = 'none';
+
+    // Show the relevant group based on selection
+    if (structure === 'daily') {
+        document.getElementById('dailyPayGroup').style.display = 'block';
+        document.getElementById('daysWorkedGroup').style.display = 'block';
+    } else if (structure === 'weekly') {
+        document.getElementById('weeklyPayGroup').style.display = 'block';
+    } else if (structure === 'monthly') {
+        document.getElementById('monthlyPayGroup').style.display = 'block';
+    }
+}
+
+const taxBands2026 = [
+  { limit: 800000, rate: 0.00 },
+  { limit: 3000000, rate: 0.15 },
+  { limit: 12000000, rate: 0.18 },
+  { limit: 25000000, rate: 0.21 },
+  { limit: 50000000, rate: 0.23 },
+  { limit: Infinity, rate: 0.25 }
+];
+
+function calculateTax() {
+  const structure = document.getElementById('salaryStructure').value;
+  const overtimeHours = parseFloat(document.getElementById('overtime').value) || 0;
+  const annualRent = parseFloat(document.getElementById('annualRent').value) || 0;
+  const transportAllowance = parseFloat(document.getElementById('transportAllowance').value) || 0;
+  const feedingAllowance = parseFloat(document.getElementById('feedingAllowance').value) || 0;
+
+  let baseMonthlyPay = 0;
+  let hourlyRate = 0;
+
+  if (structure === 'daily') {
+    const dailyPay = parseFloat(document.getElementById('dailyPay').value) || 0;
+    const daysWorked = parseFloat(document.getElementById('daysWorked').value) || 0;
+    if (dailyPay <= 0 || daysWorked <= 0) {
+        alert('Please enter a valid daily pay and number of days worked.');
+        return;
+    }
+    baseMonthlyPay = dailyPay * daysWorked;
+    hourlyRate = dailyPay / 8; // Assuming 8-hour day
+  } else if (structure === 'weekly') {
+    const weeklyPay = parseFloat(document.getElementById('weeklyPay').value) || 0;
+    if (weeklyPay <= 0) {
+        alert('Please enter a valid weekly pay.');
+        return;
+    }
+    baseMonthlyPay = weeklyPay * (52 / 12); // More accurate than 4.33
+    hourlyRate = weeklyPay / 40; // Assuming 40-hour week
+  } else if (structure === 'monthly') {
+    const monthlyPay = parseFloat(document.getElementById('monthlyPay').value) || 0;
+    if (monthlyPay <= 0) {
+        alert('Please enter a valid monthly pay.');
+        return;
+    }
+    baseMonthlyPay = monthlyPay;
+    hourlyRate = monthlyPay / (40 * (52 / 12)); // Approx 173.33 hours/month
+  }
+
+  const overtimeRate = hourlyRate * 1.5;
+  const overtimePay = overtimeHours * overtimeRate;
+  
+  const totalAllowances = transportAllowance + feedingAllowance;
+  const grossMonthly = baseMonthlyPay + overtimePay + totalAllowances;
+  const grossAnnual = grossMonthly * 12;
+
+  if (grossAnnual <= 1200000) {
+    document.getElementById('summary').innerHTML = `
+      <p><strong>Gross Monthly Income:</strong> <span>₦${grossMonthly.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+      <p><strong>Gross Annual Income:</strong> <span>₦${grossAnnual.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+      <p style="color:var(--green); font-weight:bold; justify-content: center; padding-top: 1.25rem; border: none; text-align: center;"><strong>No tax payable.</strong><br>Your annual income is below the ₦1.2M threshold.</p>`;
+    document.getElementById('stats').innerHTML = '';
+    if (window.taxChart instanceof Chart) { window.taxChart.destroy(); }
+    return;
+  }
+
+  const rentRelief = Math.min(500000, 0.2 * annualRent);
+  const totalReliefs = rentRelief; 
+  let taxable = grossAnnual - totalReliefs;
+  if (taxable < 0) taxable = 0;
+
+  let tax = 0, prevLimit = 0;
+  for (let band of taxBands2026) {
+    if (taxable > prevLimit) {
+      const taxableInBand = Math.min(taxable, band.limit) - prevLimit;
+      tax += taxableInBand * band.rate;
+      prevLimit = band.limit;
+    } else break;
+  }
+
+  const monthlyTax = tax / 12;
+  const netMonthly = grossMonthly - monthlyTax;
+  const effectiveRate = (tax / grossAnnual * 100).toFixed(2);
+
+  document.getElementById('summary').innerHTML = `
+    <p><strong>Base Pay:</strong> <span>₦${baseMonthlyPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+    <p><strong>Overtime Pay:</strong> <span>₦${overtimePay.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+    <p><strong>Allowances:</strong> <span>₦${totalAllowances.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+    <p><strong>Gross Monthly:</strong> <span>₦${grossMonthly.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+    <p><strong>Monthly Tax:</strong> <span style="color: #d00000;">₦${monthlyTax.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+    <p><strong>Net Take-home:</strong> <span style="font-size: 1.15rem; color: var(--green);">₦${netMonthly.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+  `;
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><strong>Annual Income</strong>₦${grossAnnual.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+    <div class="stat"><strong>Rent Relief Applied</strong>₦${rentRelief.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+    <div class="stat"><strong>Taxable Income</strong>₦${taxable.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+    <div class="stat"><strong>Effective Tax Rate</strong>${effectiveRate}%</div>
+  `;
+
+  updateChart(monthlyTax, netMonthly);
+}
+
+let taxChart;
+function updateChart(tax, net) {
+  const ctx = document.getElementById('taxChart').getContext('d');
+  if (taxChart) { taxChart.destroy(); }
+  taxChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Monthly Tax (PAYE)', 'Net Monthly Income'],
+      datasets: [{
+        data: [tax, net],
+        backgroundColor: ['#d00000', '#007f3d'],
+        borderColor: ['#ffffff'],
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { 
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            font: { size: 14 }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.label || '';
+              if (label) { label += ': '; }
+              if (context.parsed !== null) {
+                label += new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(context.parsed);
+              }
+              return label;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
